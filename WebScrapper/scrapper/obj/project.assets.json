@@ -1880,11 +1880,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\JJ\\proyectos1\\WebScrapper\\scrapper\\scrapper.csproj",
+      "projectUniqueName": "C:\\Users\\JJ\\proyectos1git\\CestaJusta1\\WebScrapper\\scrapper\\scrapper.csproj",
       "projectName": "scrapper",
-      "projectPath": "C:\\Users\\JJ\\proyectos1\\WebScrapper\\scrapper\\scrapper.csproj",
+      "projectPath": "C:\\Users\\JJ\\proyectos1git\\CestaJusta1\\WebScrapper\\scrapper\\scrapper.csproj",
       "packagesPath": "C:\\Users\\JJ\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\JJ\\proyectos1\\WebScrapper\\scrapper\\obj\\",
+      "outputPath": "C:\\Users\\JJ\\proyectos1git\\CestaJusta1\\WebScrapper\\scrapper\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\JJ\\AppData\\Roaming\\NuGet\\NuGet.Config"
