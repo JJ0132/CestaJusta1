@@ -1,67 +1,48 @@
-using CestaJusta.CU1.CreateProfile.Application;
-using CestaJusta.CU1.CreateProfile.Infrastructure;
+var builder = WebApplication.CreateBuilder(args);
 
-namespace CestaJusta.CU1.CreateProfile;
+// Desarrollo: permitimos llamadas desde el frontend estático.
+// Si quieres cerrarlo, cambia a .WithOrigins("http://localhost:5500", ...) en vez de AllowAnyOrigin.
+builder.Services.AddCors(o =>
+    o.AddDefaultPolicy(p => p
+        .AllowAnyOrigin()
+        .AllowAnyHeader()
+        .AllowAnyMethod()));
 
-internal static class Program
+builder.Services.AddSingleton<IProfileRepository>(sp =>
 {
-    private static async Task Main()
+    string connectionString = GetConnectionString(builder);
+    return new SqlServerProfileRepository(connectionString);
+});
+
+builder.Services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
+builder.Services.AddSingleton<CreateProfileUseCase>();
+
+var app = builder.Build();
+
+app.UseCors();
+
+app.MapPost("/api/profiles", async (CreateProfileRequest request, CreateProfileUseCase useCase, CancellationToken ct) =>
+{
+    CreateProfileResult result = await useCase.ExecuteAsync(request, ct);
+    if (!result.Success)
     {
-        Console.WriteLine("=== CASO DE USO 1: CREAR PERFIL DE USUARIO ===\n");
-
-        string connectionString = Environment.GetEnvironmentVariable("CESTAJUSTA_CONNECTION_STRING")
-            ?? "Server=localhost\\SQLEXPRESS;Database=MercadonaDB;Trusted_Connection=True;TrustServerCertificate=True;";
-
-        var repository = new SqlServerProfileRepository(connectionString);
-        var passwordHasher = new Pbkdf2PasswordHasher();
-        var useCase = new CreateProfileUseCase(repository, passwordHasher);
-
-        while (true)
-        {
-            CreateProfileRequest request = ReadRequestFromConsole();
-            CreateProfileResult result = await useCase.ExecuteAsync(request);
-
-            Console.WriteLine();
-            if (result.Success)
-            {
-                Console.WriteLine($"Perfil creado correctamente. Id asignado: {result.ProfileId}");
-                Console.WriteLine($"Usuario: {result.Profile?.NombreUsuario}");
-                Console.WriteLine($"Gmail: {result.Profile?.Gmail}");
-            }
-            else
-            {
-                Console.WriteLine($"Error: {result.Message}");
-            }
-
-            Console.WriteLine();
-            Console.Write("¿Quieres crear otro perfil? (s/n): ");
-            string? answer = Console.ReadLine();
-            if (!string.Equals(answer, "s", StringComparison.OrdinalIgnoreCase))
-            {
-                break;
-            }
-
-            Console.WriteLine();
-        }
+        return Results.BadRequest(new { ok = false, message = result.Message });
     }
 
-    private static CreateProfileRequest ReadRequestFromConsole()
-    {
-        Console.Write("Nombre: ");
-        string nombre = Console.ReadLine() ?? string.Empty;
+    return Results.Ok(new { ok = true, profileId = result.ProfileId, nombreUsuario = result.Profile?.NombreUsuario });
+});
 
-        Console.Write("Apellidos: ");
-        string apellidos = Console.ReadLine() ?? string.Empty;
+app.MapGet("/", () => Results.Ok(new { ok = true, service = "CU1_CreateProfile", endpoints = new[] { "/api/profiles" } }));
 
-        Console.Write("Nombre de usuario: ");
-        string nombreUsuario = Console.ReadLine() ?? string.Empty;
+app.Run();
 
-        Console.Write("Gmail: ");
-        string gmail = Console.ReadLine() ?? string.Empty;
-
-        Console.Write("Contraseña: ");
-        string contrasena = Console.ReadLine() ?? string.Empty;
-
-        return new CreateProfileRequest(nombre, apellidos, nombreUsuario, gmail, contrasena);
-    }
+static string GetConnectionString(WebApplicationBuilder builder)
+{
+    // Orden de prioridad:
+    // 1) appsettings / user-secrets (ConnectionStrings:CestaJusta)
+    // 2) variable de entorno CESTAJUSTA_CONNECTION_STRING
+    // 3) fallback local (SQLEXPRESS)
+    return builder.Configuration["ConnectionStrings:CestaJusta"]
+        ?? Environment.GetEnvironmentVariable("CESTAJUSTA_CONNECTION_STRING")
+        ?? "Server=localhost\\SQLEXPRESS;Database=MercadonaDB;Trusted_Connection=True;TrustServerCertificate=True;";
 }

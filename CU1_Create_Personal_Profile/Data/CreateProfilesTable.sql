@@ -8,6 +8,7 @@ BEGIN
         Nombre NVARCHAR(100) NOT NULL,
         Apellidos NVARCHAR(150) NOT NULL,
         NombreUsuario NVARCHAR(80) NOT NULL,
+    Telefono NVARCHAR(30) NULL,
         Gmail NVARCHAR(150) NOT NULL,
         PasswordHash NVARCHAR(256) NOT NULL,
         PasswordSalt NVARCHAR(128) NOT NULL,
