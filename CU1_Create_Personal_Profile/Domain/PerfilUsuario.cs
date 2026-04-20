@@ -5,6 +5,7 @@ public sealed record PerfilUsuario(
     string Nombre,
     string Apellidos,
     string NombreUsuario,
+    string? Telefono,
     string Gmail,
     string PasswordHash,
     string PasswordSalt,

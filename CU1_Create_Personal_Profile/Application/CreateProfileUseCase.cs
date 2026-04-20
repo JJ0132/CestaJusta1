@@ -28,16 +28,18 @@ public sealed class CreateProfileUseCase
         string nombre = request.Nombre.Trim();
         string apellidos = request.Apellidos.Trim();
         string nombreUsuario = request.NombreUsuario.Trim();
+    string? telefono = string.IsNullOrWhiteSpace(request.Telefono) ? null : request.Telefono.Trim();
         string gmail = request.Gmail.Trim().ToLowerInvariant();
 
-        if (await profileRepository.ExistsByNombreUsuarioAsync(nombreUsuario, cancellationToken))
+        (bool nombreUsuarioExists, bool gmailExists) = await profileRepository.CheckDuplicatesAsync(nombreUsuario, gmail, cancellationToken);
+        if (nombreUsuarioExists)
         {
             return CreateProfileResult.Failed("El nombre de usuario ya existe.");
         }
 
-        if (await profileRepository.ExistsByGmailAsync(gmail, cancellationToken))
+        if (gmailExists)
         {
-            return CreateProfileResult.Failed("El Gmail ya está registrado.");
+            return CreateProfileResult.Failed("El Gmail ya est registrado.");
         }
 
         PasswordHashResult password = passwordHasher.Hash(request.Contrasena);
@@ -46,6 +48,7 @@ public sealed class CreateProfileUseCase
             Nombre: nombre,
             Apellidos: apellidos,
             NombreUsuario: nombreUsuario,
+            Telefono: telefono,
             Gmail: gmail,
             PasswordHash: password.Hash,
             PasswordSalt: password.Salt,

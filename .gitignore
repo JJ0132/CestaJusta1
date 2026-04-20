@@ -53,3 +53,33 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+# -----------------------------
+# .NET / Visual Studio
+# -----------------------------
+[Bb]in/
+[Oo]bj/
+**/[Bb]in/
+**/[Oo]bj/
+
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+.vs/
+.vscode/
+
+# Rider
+.idea/
+
+# NuGet
+packages/
+**/packages/
+*.nupkg
+
+# ASP.NET Core
+appsettings.*.json
+
+# Logs
+*.log

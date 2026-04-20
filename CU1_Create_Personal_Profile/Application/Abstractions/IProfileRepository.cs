@@ -8,5 +8,10 @@ public interface IProfileRepository
 
     Task<bool> ExistsByGmailAsync(string gmail, CancellationToken cancellationToken = default);
 
+    Task<(bool NombreUsuarioExists, bool GmailExists)> CheckDuplicatesAsync(
+        string nombreUsuario,
+        string gmail,
+        CancellationToken cancellationToken = default);
+
     Task<int> InsertAsync(PerfilUsuario profile, CancellationToken cancellationToken = default);
 }
